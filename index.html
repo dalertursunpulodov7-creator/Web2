@@ -1,0 +1,1557 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3-Maktab Rasmiy Veb-sahifasi</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    transition: background 0.3s, color 0.3s;
+    min-width: 320px;
+    overflow-x: hidden;
+}
+
+@media (prefers-color-scheme: dark) {
+    .theme-bg {
+        background-color: #111827;
+        color: #f9fafb;
+    }
+
+    .theme-card {
+        background-color: #1f2937;
+        color: #f9fafb;
+        border-color: #374151;
+    }
+}
+
+@media (prefers-color-scheme: light) {
+    .theme-bg {
+        background-color: #f3f4f6;
+        color: #111827;
+    }
+
+    .theme-card {
+        background-color: #ffffff;
+        color: #111827;
+        border-color: #e5e7eb;
+    }
+}
+
+.sidebar-link {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    transition: 0.2s;
+}
+
+.sidebar-link:hover {
+    background-color: rgba(156, 163, 175, 0.15);
+}
+
+.hidden-section {
+    display: none !important;
+}
+
+/* GOOGLE BUTTON */
+.google-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    width: 100%;
+    max-width: 660px;
+    min-height: 80px;
+    padding: 15px 22px;
+    background: #f8f9fa;
+    color: #202124;
+    border: 2px solid #d5dce3;
+    border-radius: 12px;
+    font-size: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.google-btn img {
+    width: 32px;
+    height: 32px;
+}
+
+.google-btn:hover {
+    background: #f1f3f4;
+}
+
+.google-btn:active {
+    transform: scale(0.99);
+}
+
+.google-btn:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+.profile-photo {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+#main-interface {
+    width: 100%;
+    min-height: 100vh;
+}
+
+#main-interface > aside {
+    flex: 0 0 16rem;
+}
+
+#main-interface > main {
+    min-width: 0;
+    width: 100%;
+}
+
+#canvas-container {
+    width: 100%;
+    height: 450px;
+    overflow: hidden;
+}
+
+#canvas-container canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+@media(max-width:767px) {
+    #main-interface {
+        flex-direction: column;
+    }
+
+    #main-interface > aside {
+        width: 100%;
+        flex: none;
+    }
+
+    #canvas-container {
+        height: 320px;
+    }
+
+    .google-btn {
+        min-height: 65px;
+        font-size: 18px;
+    }
+
+    .google-btn img {
+        width: 27px;
+        height: 27px;
+    }
+}
+</style>
+</head>
+
+<body class="theme-bg min-h-screen flex flex-col m-0 p-0">
+
+<!-- KIRISH EKRANI -->
+
+<div id="splash-screen"
+     class="fixed inset-0 z-50 flex flex-col justify-between p-6 bg-cover bg-center text-white"
+     style="background-image:linear-gradient(rgba(0,0,0,0.65),rgba(0,0,0,0.75)),url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=1600&auto=format&fit=crop');">
+
+    <div class="flex justify-end">
+        <select id="lang-selector"
+                class="bg-black/60 text-white border border-white/30 rounded px-3 py-1 text-sm">
+            <option value="uz">🇺🇿 O'zbekcha</option>
+            <option value="en">🇬🇧 English</option>
+            <option value="ru">🇷🇺 Русский</option>
+            <option value="tr">🇹🇷 Türkçe</option>
+            <option value="ar">🇦🇪 العربية</option>
+            <option value="de">🇩🇪 Deutsch</option>
+            <option value="fr">🇫🇷 Français</option>
+            <option value="zh">🇨🇳 简体中文</option>
+            <option value="ja">🇯🇵 日本語</option>
+            <option value="ko">🇰🇷 한국어</option>
+        </select>
+    </div>
+
+    <div class="text-center max-w-3xl mx-auto my-auto space-y-4">
+        <h1 class="text-4xl md:text-6xl font-black tracking-wide uppercase drop-shadow-lg">
+            Assalomu Aleykum
+        </h1>
+
+        <p class="text-base md:text-xl font-light opacity-90 leading-relaxed drop-shadow-md">
+            Bu veb sayt O'zbekiston Respublikasi Surxondaryo viloyati Sariosiyo tumanidagi 3-umumta'lim maktabining asosiy veb sahifasi.
+        </p>
+    </div>
+
+    <div class="flex flex-col items-center mb-8 space-y-4">
+
+        <button id="google-signin-button"
+                onclick="submitGoogleLogin()"
+                class="google-btn">
+
+            <img src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/web-24dp/logo_googleg_color_24dp.png"
+                 alt="Google">
+
+            <span>Continue with Google</span>
+
+        </button>
+
+        <p id="google-login-error"
+           class="text-sm text-red-300 text-center max-w-xl"
+           role="alert"></p>
+
+    </div>
+</div>
+
+
+<!-- ASOSIY SAYT -->
+
+<div id="main-interface"
+     class="flex-grow flex flex-col md:flex-row hidden-section">
+
+    <aside class="w-full md:w-64 theme-card border-r flex flex-col p-4 space-y-6">
+
+        <div class="flex items-center gap-3 p-2 bg-gray-500/10 rounded-xl">
+
+            <img id="user-photo"
+                 class="profile-photo hidden-section"
+                 alt="Profil rasmi">
+
+            <div id="user-avatar"
+                 class="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg uppercase shadow">
+                G
+            </div>
+
+            <div class="overflow-hidden flex-grow">
+                <h4 id="user-display-name" class="font-bold text-sm truncate">
+                    Mehmon
+                </h4>
+
+                <p id="user-display-email" class="text-xs opacity-60 truncate">
+                    email@gmail.com
+                </p>
+            </div>
+
+        </div>
+
+        <nav class="flex flex-col gap-1 flex-grow text-sm font-medium">
+
+            <div onclick="showSection('3d-shakl')" class="sidebar-link">
+                🏢 3D Maktab Shakli
+            </div>
+
+            <div onclick="showSection('malumotlar')" class="sidebar-link">
+                📊 Maktab Haqida
+            </div>
+
+            <div onclick="showSection('yutuqlar')" class="sidebar-link">
+                🏆 O'quvchilar Yutuqlari
+            </div>
+
+            <div onclick="showSection('yangiliklar')" class="sidebar-link">
+                📰 Maktab Yangiliklari
+            </div>
+
+            <div onclick="showSection('royxat')" class="sidebar-link">
+                👥 O'quvchilar Ro'yxati
+            </div>
+
+            <div onclick="showSection('boglanish')" class="sidebar-link">
+                📞 Admin bilan Bog'lanish
+            </div>
+
+            <div onclick="promptAdminAccess()"
+                 class="sidebar-link text-red-500 font-bold border border-red-500/20 mt-4 bg-red-500/5">
+                ⚙️ Admin Paneli
+            </div>
+
+        </nav>
+
+        <button onclick="logoutSite()"
+                class="text-xs text-center opacity-50 hover:opacity-100 transition py-2 cursor-pointer">
+            🔄 Saytdan chiqish
+        </button>
+
+    </aside>
+
+
+    <main class="flex-grow p-4 md:p-6 overflow-y-auto">
+
+        <!-- 3D MAKTAB -->
+
+        <section id="3d-shakl" class="section-block space-y-4">
+
+            <div class="text-center">
+                <h2 class="text-2xl font-bold">
+                    Maktabning Interaktiv 3D Shakli
+                </h2>
+
+                <p class="text-xs opacity-60">
+                    Sichqoncha yoki barmog'ingiz orqali aylantiring, yaqinlashtiring va uzoqlashtiring.
+                </p>
+            </div>
+
+            <div id="canvas-container"
+                 class="w-full rounded-2xl shadow-inner border border-gray-500/20 bg-transparent">
+            </div>
+
+        </section>
+
+
+        <!-- MAKTAB HAQIDA -->
+
+        <section id="malumotlar"
+                 class="section-block hidden-section space-y-6">
+
+            <h2 class="text-2xl font-bold text-center border-b pb-2 border-gray-500/20">
+                Maktab Haqida Ma'lumotlar
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <div class="theme-card p-5 border rounded-2xl shadow-sm space-y-3">
+
+                    <h3 class="font-bold text-blue-500 text-lg">
+                        Asosiy Ko'rsatkichlar
+                    </h3>
+
+                    <ul class="space-y-2 text-sm">
+                        <li>📅 <strong>Tashkil topgan yil:</strong> <span id="stat-year">1990-yil</span></li>
+                        <li>🛠 <strong>Oxirgi marta remont qilingan:</strong> <span id="stat-remont">2023-yil</span></li>
+                        <li>🏫 <strong>Maktab holati:</strong> <span id="stat-status">Zamonaviy, to'liq jihozlangan</span></li>
+                        <li>👨‍🎓 <strong>O'quvchilar soni:</strong> <span id="stat-students">850 nafar</span></li>
+                        <li>👩‍🏫 <strong>O'qituvchilar soni:</strong> <span id="stat-teachers">65 nafar</span></li>
+                        <li>💼 <strong>Jami ishchilar soni:</strong> <span id="stat-workers">82 nafar</span></li>
+                    </ul>
+
+                </div>
+
+                <div class="theme-card p-5 border rounded-2xl shadow-sm flex flex-col justify-center items-center text-center">
+
+                    <div class="w-full h-40 bg-gray-500/20 rounded-xl flex items-center justify-center text-sm font-semibold mb-2">
+                        [ Foto va Videogalereya ]
+                    </div>
+
+                    <p class="text-xs opacity-50">
+                        Maktab hayotidan lavhalar, sinfxonalar va laboratoriyalar rasmlari.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- YUTUQLAR -->
+
+        <section id="yutuqlar"
+                 class="section-block hidden-section space-y-6">
+
+            <h2 class="text-2xl font-bold text-center border-b pb-2 border-gray-500/20">
+                O'quvchilarning Yutuqlari
+            </h2>
+
+            <div id="yutuqlar-grid"
+                 class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <div class="theme-card border rounded-2xl overflow-hidden shadow-sm flex flex-col">
+
+                    <div class="h-56 bg-gradient-to-tr from-yellow-500 to-orange-500 flex items-center justify-center text-white font-bold text-sm">
+                        Rasm / Video
+                    </div>
+
+                    <div class="p-4 flex-grow space-y-2">
+                        <h4 class="font-bold text-base">
+                            Eshmuradov Dilshod
+                        </h4>
+
+                        <p class="text-xs text-blue-500 font-medium">
+                            10-B sinf o'quvchisi
+                        </p>
+
+                        <p class="text-xs opacity-85 leading-relaxed">
+                            Viloyat miqyosida o'tkazilgan "Prezident bilimdonlari" tanlovida faxrli 1-o'rinni egalladi.
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- YANGILIKLAR -->
+
+        <section id="yangiliklar"
+                 class="section-block hidden-section space-y-6">
+
+            <h2 class="text-2xl font-bold text-center border-b pb-2 border-gray-500/20">
+                Maktab Yangiliklari
+            </h2>
+
+            <div id="yangiliklar-list" class="space-y-4">
+
+                <div class="theme-card border p-4 rounded-xl shadow-sm flex flex-col sm:flex-row gap-4">
+
+                    <div class="w-full sm:w-1/4 h-32 bg-blue-500/30 rounded-lg flex items-center justify-center font-bold text-xs">
+                        Klip / Lavha
+                    </div>
+
+                    <div class="flex-grow space-y-1">
+
+                        <span class="text-[10px] bg-blue-500/20 text-blue-600 px-2 py-0.5 rounded font-bold">
+                            1-Oktyabr
+                        </span>
+
+                        <h3 class="font-bold text-base">
+                            Ustozlar va murabbiylar kuni munosabati bilan bayram tadbiri
+                        </h3>
+
+                        <p class="text-xs opacity-75">
+                            Maktabimizda o'quvchilar tomonidan ustozlarga bag'ishlangan she'riy va musiqiy chiqishlar namoyish etildi.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- O'QUVCHILAR -->
+
+        <section id="royxat"
+                 class="section-block hidden-section space-y-4">
+
+            <h2 class="text-2xl font-bold text-center">
+                O'quvchilar Ro'yxati
+            </h2>
+
+            <div class="theme-card border rounded-xl overflow-x-auto shadow-sm">
+
+                <table class="w-full text-left border-collapse text-xs">
+
+                    <thead>
+                        <tr class="bg-gray-500/10 font-bold border-b border-gray-500/20">
+                            <th class="p-3">№</th>
+                            <th class="p-3">Ism Familiya</th>
+                            <th class="p-3">Sinifi</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="students-tbody"
+                           class="divide-y divide-gray-500/10">
+
+                        <tr>
+                            <td class="p-3">1</td>
+                            <td class="p-3">Xoliqov Jamshid</td>
+                            <td class="p-3">11-A</td>
+                        </tr>
+
+                        <tr>
+                            <td class="p-3">2</td>
+                            <td class="p-3">Tursunova Maftuna</td>
+                            <td class="p-3">9-B</td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+        <!-- BOG'LANISH -->
+
+        <section id="boglanish"
+                 class="section-block hidden-section space-y-6">
+
+            <h2 class="text-2xl font-bold text-center border-b pb-2 border-gray-500/20">
+                Adminlar Bilan Bog'lanish
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <div class="theme-card border p-5 rounded-2xl shadow-sm space-y-3 text-sm">
+
+                    <h3 class="font-bold text-blue-500 text-base">
+                        Aloqa kanallari
+                    </h3>
+
+                    <p>📞 <strong>Telefon:</strong> +998 99 123-45-67</p>
+                    <p>✈️ <strong>Telegram:</strong> @sariosiyo3maktab</p>
+                    <p>📸 <strong>Instagram:</strong> @sariosiyo3_maktab</p>
+
+                </div>
+
+                <div class="theme-card border p-5 rounded-2xl shadow-sm">
+
+                    <form onsubmit="alert('Xabaringiz yuborildi!'); this.reset(); return false;"
+                          class="space-y-3 text-xs">
+
+                        <input type="text"
+                               placeholder="Ismingiz"
+                               required
+                               class="w-full p-2.5 rounded border border-gray-500/30 bg-transparent">
+
+                        <textarea placeholder="Xabaringizni shu yerga yozing..."
+                                  rows="4"
+                                  required
+                                  class="w-full p-2.5 rounded border border-gray-500/30 bg-transparent"></textarea>
+
+                        <button type="submit"
+                                class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg cursor-pointer hover:bg-blue-700 transition">
+                            Xabarni Yo'llash
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ADMIN PANELI -->
+
+        <section id="admin-dashboard"
+                 class="section-block hidden-section space-y-6">
+
+            <div class="flex flex-wrap justify-between items-center border-b pb-3 border-gray-500/20">
+
+                <h2 class="text-2xl font-black text-red-500">
+                    🛠 Tizim Boshqaruv Paneli (Admin)
+                </h2>
+
+                <button onclick="showSection('3d-shakl')"
+                        class="bg-gray-500 text-white px-3 py-1 rounded text-xs cursor-pointer">
+                    Panelni yopish
+                </button>
+
+            </div>
+
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <div class="theme-card border p-4 rounded-xl space-y-2">
+
+                    <h3 class="font-bold text-sm">
+                        1. Sayt Shriftini O'zgartirish
+                    </h3>
+
+                    <select id="font-style-select"
+                            onchange="changeSiteFont(this.value)"
+                            class="w-full border border-gray-500/30 rounded p-2 bg-transparent">
+
+                        <option value="Arial, sans-serif">Arial (Standart)</option>
+                        <option value="'Times New Roman', serif">Times New Roman</option>
+                        <option value="'Courier New', monospace">Courier New</option>
+                        <option value="Verdana, sans-serif">Verdana</option>
+                        <option value="Georgia, serif">Georgia</option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="theme-card border p-4 rounded-xl space-y-2">
+
+                    <h3 class="font-bold text-sm">
+                        2. Maktab Statistikasini Tahrirlash
+                    </h3>
+
+                    <div class="grid grid-cols-2 gap-2">
+
+                        <input type="text" id="edit-year"
+                               placeholder="Tashkil yil"
+                               class="border border-gray-500/30 p-1.5 rounded bg-transparent">
+
+                        <input type="text" id="edit-remont"
+                               placeholder="Remont yili"
+                               class="border border-gray-500/30 p-1.5 rounded bg-transparent">
+
+                        <input type="text" id="edit-students"
+                               placeholder="O'quvchilar soni"
+                               class="border border-gray-500/30 p-1.5 rounded bg-transparent">
+
+                        <input type="text" id="edit-teachers"
+                               placeholder="O'qituvchilar soni"
+                               class="border border-gray-500/30 p-1.5 rounded bg-transparent">
+
+                    </div>
+
+                    <button onclick="updateStats()"
+                            class="w-full bg-green-600 text-white p-2 rounded font-bold cursor-pointer">
+                        Saqlash
+                    </button>
+
+                </div>
+
+
+                <div class="theme-card border p-4 rounded-xl space-y-2">
+
+                    <h3 class="font-bold text-sm">
+                        3. Yangilik Qo'shish / Tahrirlash
+                    </h3>
+
+                    <input type="text" id="new-title"
+                           placeholder="Yangilik sarlavhasi"
+                           class="w-full border border-gray-500/30 p-2 rounded bg-transparent">
+
+                    <input type="text" id="new-date"
+                           placeholder="Sana (Masalan: 30-Oktyabr)"
+                           class="w-full border border-gray-500/30 p-2 rounded bg-transparent">
+
+                    <textarea id="new-desc"
+                              placeholder="Batafsil matni..."
+                              rows="3"
+                              class="w-full border border-gray-500/30 p-2 rounded bg-transparent"></textarea>
+
+                    <button onclick="addNewsAdmin()"
+                            class="w-full bg-blue-600 text-white p-2 rounded font-bold cursor-pointer">
+                        Yangilikni Chop Etish
+                    </button>
+
+                </div>
+
+
+                <div class="theme-card border p-4 rounded-xl space-y-2">
+
+                    <h3 class="font-bold text-sm">
+                        4. Yangi Yutuq Qo'shish (Instagram Style)
+                    </h3>
+
+                    <input type="text" id="yutuq-name"
+                           placeholder="O'quvchi Ism Familiyasi"
+                           class="w-full border border-gray-500/30 p-2 rounded bg-transparent">
+
+                    <input type="text" id="yutuq-class"
+                           placeholder="Sinfi"
+                           class="w-full border border-gray-500/30 p-2 rounded bg-transparent">
+
+                    <textarea id="yutuq-text"
+                              placeholder="Erishgan yutug'i..."
+                              rows="2"
+                              class="w-full border border-gray-500/30 p-2 rounded bg-transparent"></textarea>
+
+                    <button onclick="addYutuqAdmin()"
+                            class="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white p-2 rounded font-bold cursor-pointer">
+                        Instagram Post Yaratish
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<script>
+
+/* ==========================================
+   FIREBASE SOZLAMALARI
+========================================== */
+
+/*
+Firebase Console'dan o'z loyihang ma'lumotlarini
+olib, quyidagi 4 ta qiymatni almashtirishing kerak.
+*/
+
+const firebaseConfig = {
+    apiKey: "FIREBASE_API_KEY",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    appId: "YOUR_FIREBASE_APP_ID"
+};
+
+
+/* ADMIN KODI */
+
+const SECRET_ADMIN_CODE = "777";
+
+
+/* FIREBASE O'ZGARUVCHILARI */
+
+let firebaseReady = false;
+let firebaseAuth = null;
+let currentUser = null;
+
+
+/* ==========================================
+   FIREBASE ISHGA TUSHIRISH
+========================================== */
+
+function initializeFirebase() {
+
+    try {
+
+        const configIsSet =
+            firebaseConfig.apiKey !== "FIREBASE_API_KEY" &&
+            firebaseConfig.authDomain !== "YOUR_PROJECT_ID.firebaseapp.com" &&
+            firebaseConfig.projectId !== "YOUR_PROJECT_ID" &&
+            firebaseConfig.appId !== "YOUR_FIREBASE_APP_ID";
+
+        if (!configIsSet) {
+            console.warn("Firebase ma'lumotlari hali kiritilmagan.");
+            return;
+        }
+
+        if (typeof firebase === "undefined") {
+            throw new Error("Firebase kutubxonasi yuklanmadi.");
+        }
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        firebaseAuth = firebase.auth();
+        firebaseReady = true;
+
+        firebaseAuth.setPersistence(
+            firebase.auth.Auth.Persistence.LOCAL
+        ).catch(error => {
+            console.error("Persistence xatosi:", error);
+        });
+
+        firebaseAuth.onAuthStateChanged(user => {
+
+            if (user) {
+                showLoggedInUser(user);
+            } else {
+                currentUser = null;
+            }
+
+        });
+
+        /*
+        Google redirect natijasini tekshirish.
+        Foydalanuvchi Google'dan qaytganda xato bo'lsa
+        ekranga chiqariladi.
+        */
+
+        firebaseAuth.getRedirectResult()
+            .then(result => {
+
+                if (result && result.user) {
+                    showLoggedInUser(result.user);
+                }
+
+            })
+            .catch(error => {
+
+                console.error("Google redirect xatosi:", error);
+
+                showGoogleError(error);
+
+            });
+
+    } catch (error) {
+
+        console.error("Firebase xatosi:", error);
+
+        showGoogleError(error);
+
+    }
+
+}
+
+
+/* ==========================================
+   GOOGLE XATOLIKLARI
+========================================== */
+
+function showGoogleError(error) {
+
+    const box = document.getElementById("google-login-error");
+
+    if (!box) return;
+
+    const code = error && error.code ? error.code : "";
+
+    const messages = {
+
+        "auth/unauthorized-domain":
+            "Sayt domeni Firebase ruxsat etilgan domenlariga qo'shilmagan.",
+
+        "auth/operation-not-allowed":
+            "Firebase'da Google orqali kirish yoqilmagan.",
+
+        "auth/invalid-api-key":
+            "Firebase API kaliti noto'g'ri.",
+
+        "auth/network-request-failed":
+            "Internet aloqasini tekshiring.",
+
+        "auth/account-exists-with-different-credential":
+            "Bu email boshqa kirish usuli bilan ro'yxatdan o'tgan.",
+
+        "auth/popup-blocked":
+            "Brauzer kirish oynasini blokladi.",
+
+        "auth/popup-closed-by-user":
+            "Google kirish oynasi yopildi.",
+
+        "auth/invalid-continue-uri":
+            "Sayt manzili noto'g'ri sozlangan.",
+
+        "auth/invalid-api-key":
+            "Firebase API kaliti noto'g'ri.",
+
+        "auth/too-many-requests":
+            "Juda ko'p urinish bo'ldi. Keyinroq urinib ko'ring."
+
+    };
+
+    box.textContent =
+        messages[code] ||
+        "Google orqali kirishda xatolik: " + (code || "Noma'lum xatolik");
+
+}
+
+
+/* ==========================================
+   GOOGLE ORQALI KIRISH
+========================================== */
+
+async function submitGoogleLogin() {
+
+    const button =
+        document.getElementById("google-signin-button");
+
+    const errorBox =
+        document.getElementById("google-login-error");
+
+    errorBox.textContent = "";
+
+    if (!firebaseReady || !firebaseAuth) {
+
+        errorBox.textContent =
+            "Firebase sozlanmagan. Koddagi Firebase ma'lumotlarini kiritish kerak.";
+
+        return;
+
+    }
+
+    button.disabled = true;
+
+    button.querySelector("span").textContent =
+        "Google oynasi ochilmoqda...";
+
+    try {
+
+        const provider =
+            new firebase.auth.GoogleAuthProvider();
+
+        provider.setCustomParameters({
+            prompt: "select_account"
+        });
+
+        /*
+        Redirect usuli telefondagi Chrome uchun qulay.
+        Foydalanuvchi Google akkauntini tanlab,
+        saytga qaytadi.
+        */
+
+        await firebaseAuth.signInWithRedirect(provider);
+
+    } catch (error) {
+
+        console.error("Google login xatosi:", error);
+
+        showGoogleError(error);
+
+        button.disabled = false;
+
+        button.querySelector("span").textContent =
+            "Continue with Google";
+
+    }
+
+}
+
+
+/* ==========================================
+   FOYDALANUVCHI PROFILI
+========================================== */
+
+function showLoggedInUser(user) {
+
+    if (!user) return;
+
+    currentUser = user;
+
+    const fullName =
+        (user.displayName || "Google foydalanuvchisi").trim();
+
+    const email =
+        user.email || "Email mavjud emas";
+
+    document.getElementById("user-display-name").textContent =
+        fullName;
+
+    document.getElementById("user-display-email").textContent =
+        email;
+
+    const avatar =
+        document.getElementById("user-avatar");
+
+    const photo =
+        document.getElementById("user-photo");
+
+    avatar.textContent =
+        fullName.charAt(0).toUpperCase();
+
+    if (user.photoURL) {
+
+        photo.src = user.photoURL;
+
+        photo.classList.remove("hidden-section");
+
+        avatar.classList.add("hidden-section");
+
+        photo.onerror = function() {
+
+            photo.classList.add("hidden-section");
+
+            avatar.classList.remove("hidden-section");
+
+        };
+
+    } else {
+
+        photo.classList.add("hidden-section");
+
+        avatar.classList.remove("hidden-section");
+
+    }
+
+    document.getElementById("splash-screen")
+        .classList.add("hidden-section");
+
+    document.getElementById("main-interface")
+        .classList.remove("hidden-section");
+
+    setTimeout(function() {
+        init3DModel();
+    }, 300);
+
+}
+
+
+/* ==========================================
+   BO'LIMLARNI ALMASHTIRISH
+========================================== */
+
+function showSection(id) {
+
+    document.querySelectorAll(".section-block")
+        .forEach(section => {
+            section.classList.add("hidden-section");
+        });
+
+    const target = document.getElementById(id);
+
+    if (target) {
+        target.classList.remove("hidden-section");
+    }
+
+    if (id === "3d-shakl") {
+
+        setTimeout(function() {
+
+            if (renderer && camera) {
+
+                const container =
+                    document.getElementById("canvas-container");
+
+                camera.aspect =
+                    container.clientWidth / container.clientHeight;
+
+                camera.updateProjectionMatrix();
+
+                renderer.setSize(
+                    container.clientWidth,
+                    container.clientHeight
+                );
+
+            }
+
+        }, 100);
+
+    }
+
+}
+
+
+/* ==========================================
+   SAYTDAN CHIQISH
+========================================== */
+
+async function logoutSite() {
+
+    try {
+
+        if (firebaseAuth) {
+            await firebaseAuth.signOut();
+        }
+
+        currentUser = null;
+
+        document.getElementById("main-interface")
+            .classList.add("hidden-section");
+
+        document.getElementById("splash-screen")
+            .classList.remove("hidden-section");
+
+        document.getElementById("user-photo")
+            .classList.add("hidden-section");
+
+        document.getElementById("user-avatar")
+            .classList.remove("hidden-section");
+
+        document.getElementById("user-avatar").textContent = "G";
+
+        document.getElementById("user-display-name").textContent =
+            "Mehmon";
+
+        document.getElementById("user-display-email").textContent =
+            "email@gmail.com";
+
+    } catch (error) {
+
+        console.error("Chiqish xatosi:", error);
+
+        alert("Saytdan chiqishda xatolik yuz berdi.");
+
+    }
+
+}
+
+
+/* ==========================================
+   ADMIN PANELI
+========================================== */
+
+function promptAdminAccess() {
+
+    if (!currentUser) {
+
+        alert("Avval Google akkaunt orqali kiring.");
+
+        return;
+
+    }
+
+    const code = prompt(
+        "Admin panelga kirish uchun maxfiy sonni kiriting:"
+    );
+
+    if (code === SECRET_ADMIN_CODE) {
+
+        showSection("admin-dashboard");
+
+    } else if (code !== null) {
+
+        alert("Noto'g'ri maxfiy son kiritildi!");
+
+    }
+
+}
+
+
+/* ==========================================
+   SHRIFTNI O'ZGARTIRISH
+========================================== */
+
+function changeSiteFont(fontName) {
+
+    document.body.style.fontFamily = fontName;
+
+}
+
+
+/* ==========================================
+   STATISTIKANI TAHRIRLASH
+========================================== */
+
+function updateStats() {
+
+    const yr =
+        document.getElementById("edit-year").value.trim();
+
+    const rm =
+        document.getElementById("edit-remont").value.trim();
+
+    const st =
+        document.getElementById("edit-students").value.trim();
+
+    const tc =
+        document.getElementById("edit-teachers").value.trim();
+
+    if (yr) {
+        document.getElementById("stat-year").textContent = yr;
+    }
+
+    if (rm) {
+        document.getElementById("stat-remont").textContent = rm;
+    }
+
+    if (st) {
+        document.getElementById("stat-students").textContent = st;
+    }
+
+    if (tc) {
+        document.getElementById("stat-teachers").textContent = tc;
+    }
+
+    alert("Statistikalar yangilandi!");
+
+}
+
+
+/* ==========================================
+   XAVFSIZ MATN
+========================================== */
+
+function safeText(value) {
+
+    return String(value).replace(/[&<>"']/g, function(character) {
+
+        const map = {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;"
+        };
+
+        return map[character];
+
+    });
+
+}
+
+
+/* ==========================================
+   YANGILIK QO'SHISH
+========================================== */
+
+function addNewsAdmin() {
+
+    const title =
+        document.getElementById("new-title").value.trim();
+
+    const date =
+        document.getElementById("new-date").value.trim();
+
+    const desc =
+        document.getElementById("new-desc").value.trim();
+
+    if (!title || !date || !desc) {
+
+        alert("Barcha maydonlarni to'ldiring!");
+
+        return;
+
+    }
+
+    const list =
+        document.getElementById("yangiliklar-list");
+
+    const item = document.createElement("div");
+
+    item.className =
+        "theme-card border p-4 rounded-xl shadow-sm flex flex-col sm:flex-row gap-4";
+
+    const media = document.createElement("div");
+
+    media.className =
+        "w-full sm:w-1/4 h-32 bg-blue-500/30 rounded-lg flex items-center justify-center font-bold text-xs";
+
+    media.textContent = "Yangi Lavha";
+
+    const content = document.createElement("div");
+
+    content.className = "flex-grow space-y-1";
+
+    const dateElement = document.createElement("span");
+
+    dateElement.className =
+        "text-[10px] bg-blue-500/20 text-blue-600 px-2 py-0.5 rounded font-bold";
+
+    dateElement.textContent = date;
+
+    const heading = document.createElement("h3");
+
+    heading.className = "font-bold text-base";
+
+    heading.textContent = title;
+
+    const paragraph = document.createElement("p");
+
+    paragraph.className = "text-xs opacity-75";
+
+    paragraph.textContent = desc;
+
+    content.append(dateElement, heading, paragraph);
+
+    item.append(media, content);
+
+    list.prepend(item);
+
+    alert("Yangilik muvaffaqiyatli qo'shildi!");
+
+    document.getElementById("new-title").value = "";
+
+    document.getElementById("new-date").value = "";
+
+    document.getElementById("new-desc").value = "";
+
+}
+
+
+/* ==========================================
+   YUTUQ QO'SHISH
+========================================== */
+
+function addYutuqAdmin() {
+
+    const name =
+        document.getElementById("yutuq-name").value.trim();
+
+    const cls =
+        document.getElementById("yutuq-class").value.trim();
+
+    const txt =
+        document.getElementById("yutuq-text").value.trim();
+
+    if (!name || !cls || !txt) {
+
+        alert("Barcha maydonlarni to'ldiring!");
+
+        return;
+
+    }
+
+    const grid =
+        document.getElementById("yutuqlar-grid");
+
+    const post = document.createElement("div");
+
+    post.className =
+        "theme-card border rounded-2xl overflow-hidden shadow-sm flex flex-col";
+
+    const media = document.createElement("div");
+
+    media.className =
+        "h-56 bg-gradient-to-tr from-purple-600 to-pink-500 flex items-center justify-center text-white font-bold text-sm";
+
+    media.textContent = "Rasm / Video";
+
+    const content = document.createElement("div");
+
+    content.className = "p-4 flex-grow space-y-2";
+
+    const heading = document.createElement("h4");
+
+    heading.className = "font-bold text-base";
+
+    heading.textContent = name;
+
+    const classText = document.createElement("p");
+
+    classText.className = "text-xs text-blue-500 font-medium";
+
+    classText.textContent = cls;
+
+    const description = document.createElement("p");
+
+    description.className = "text-xs opacity-85 leading-relaxed";
+
+    description.textContent = txt;
+
+    content.append(heading, classText, description);
+
+    post.append(media, content);
+
+    grid.prepend(post);
+
+    alert("Yutuq posti yaratildi!");
+
+    document.getElementById("yutuq-name").value = "";
+
+    document.getElementById("yutuq-class").value = "";
+
+    document.getElementById("yutuq-text").value = "";
+
+}
+
+
+/* ==========================================
+   3D MAKTAB MODELI
+========================================== */
+
+let scene = null;
+let camera = null;
+let renderer = null;
+let controls = null;
+let animationStarted = false;
+
+
+function init3DModel() {
+
+    const container =
+        document.getElementById("canvas-container");
+
+    if (!container) return;
+
+    if (renderer) {
+
+        resize3DModel();
+
+        return;
+
+    }
+
+    if (typeof THREE === "undefined" ||
+        typeof THREE.OrbitControls === "undefined") {
+
+        console.error("Three.js yoki OrbitControls yuklanmadi.");
+
+        container.textContent =
+            "3D model yuklanmadi. Internet aloqasini tekshiring.";
+
+        return;
+
+    }
+
+    try {
+
+        const isDark =
+            window.matchMedia &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+        scene = new THREE.Scene();
+
+        scene.background = new THREE.Color(
+            isDark ? 0x111827 : 0xf3f4f6
+        );
+
+        camera = new THREE.PerspectiveCamera(
+            45,
+            container.clientWidth / container.clientHeight,
+            1,
+            1000
+        );
+
+        camera.position.set(35, 25, 45);
+
+        renderer = new THREE.WebGLRenderer({
+            antialias: true
+        });
+
+        renderer.setPixelRatio(
+            Math.min(window.devicePixelRatio || 1, 2)
+        );
+
+        renderer.setSize(
+            container.clientWidth,
+            container.clientHeight
+        );
+
+        container.appendChild(renderer.domElement);
+
+        controls = new THREE.OrbitControls(
+            camera,
+            renderer.domElement
+        );
+
+        controls.enableDamping = true;
+
+        controls.dampingFactor = 0.05;
+
+        controls.maxPolarAngle = Math.PI / 2 - 0.05;
+
+
+        const ambientLight =
+            new THREE.AmbientLight(0xffffff, 0.7);
+
+        scene.add(ambientLight);
+
+
+        const directionalLight =
+            new THREE.DirectionalLight(0xffffff, 0.8);
+
+        directionalLight.position.set(20, 40, 20);
+
+        scene.add(directionalLight);
+
+
+        const group = new THREE.Group();
+
+
+        const groundGeometry =
+            new THREE.PlaneGeometry(60, 60);
+
+        const groundMaterial =
+            new THREE.MeshStandardMaterial({
+                color: isDark ? 0x374151 : 0xa5b4fc
+            });
+
+        const ground =
+            new THREE.Mesh(groundGeometry, groundMaterial);
+
+        ground.rotation.x = -Math.PI / 2;
+
+        group.add(ground);
+
+
+        const buildingGeometry =
+            new THREE.BoxGeometry(26, 12, 10);
+
+        const buildingMaterial =
+            new THREE.MeshStandardMaterial({
+                color: 0xf1f5f9
+            });
+
+        const building =
+            new THREE.Mesh(buildingGeometry, buildingMaterial);
+
+        building.position.y = 6;
+
+        group.add(building);
+
+
+        const roofGeometry =
+            new THREE.ConeGeometry(18, 5, 4);
+
+        const roofMaterial =
+            new THREE.MeshStandardMaterial({
+                color: 0xef4444
+            });
+
+        const roof =
+            new THREE.Mesh(roofGeometry, roofMaterial);
+
+        roof.position.set(0, 14.5, 0);
+
+        roof.rotation.y = Math.PI / 4;
+
+        group.add(roof);
+
+
+        scene.add(group);
+
+
+        function animate() {
+
+            requestAnimationFrame(animate);
+
+            if (controls) {
+                controls.update();
+            }
+
+            if (renderer && scene && camera) {
+                renderer.render(scene, camera);
+            }
+
+        }
+
+        if (!animationStarted) {
+
+            animationStarted = true;
+
+            animate();
+
+        }
+
+        resize3DModel();
+
+    } catch (error) {
+
+        console.error("3D model xatosi:", error);
+
+        container.textContent =
+            "3D modelni yuklashda xatolik yuz berdi.";
+
+    }
+
+}
+
+
+/* ==========================================
+   3D O'LCHAMINI MOSLASH
+========================================== */
+
+function resize3DModel() {
+
+    const container =
+        document.getElementById("canvas-container");
+
+    if (!container || !renderer || !camera) return;
+
+    const width = container.clientWidth;
+
+    const height = container.clientHeight;
+
+    if (!width || !height) return;
+
+    camera.aspect = width / height;
+
+    camera.updateProjectionMatrix();
+
+    renderer.setSize(width, height);
+
+}
+
+
+/* ==========================================
+   OYNANI O'ZGARTIRISH
+========================================== */
+
+window.addEventListener("resize", resize3DModel);
+
+
+/* ==========================================
+   SAYT ISHGA TUSHISHI
+========================================== */
+
+document.addEventListener("DOMContentLoaded", function() {
+
+    initializeFirebase();
+
+});
+
+</script>
+
+</body>
+</html>
